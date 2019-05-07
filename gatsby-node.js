@@ -1,23 +1,23 @@
-const path = require('path')
+const path = require("path");
 
-exports.createPages = ({ graphql, actions }) => {
-  const { createPage } = actions
+exports.createPages = ({ graphql, boundActionCreators }) => {
+  const { createPage } = boundActionCreators;
 
   return new Promise((resolve, reject) => {
-    const storyblokEntry = path.resolve('src/templates/storyblok-entry.js')
+    const storyblokEntry = path.resolve("src/templates/storyblok-entry.js");
 
-    resolve(
-      graphql(
-        `{
-          stories: allStoryblokEntry {
+    graphql(
+      `
+        {
+          allStoryblokEntry(filter: { slug: { eq: "settings" } }) {
             edges {
               node {
                 id
                 name
                 created_at
+                published_at
                 uuid
                 slug
-                field_component
                 full_slug
                 content
                 is_startpage
@@ -26,37 +26,57 @@ exports.createPages = ({ graphql, actions }) => {
               }
             }
           }
-        }`
-      ).then(result => {
-        if (result.errors) {
-          console.log(result.errors)
-          reject(result.errors)
         }
+      `
+    ).then(result => {
+      if (result.errors) {
+        console.log(result.errors);
+        reject(result.errors);
+      }
 
-        const entries = result.data.stories.edges
-        const contents = entries.filter((entry) => {
-          return entry.node.field_component != 'global_navi'
-        })
-
-        contents.forEach((entry, index) => {
-          const pagePath = entry.node.full_slug == 'home' ? '' : `${entry.node.full_slug}/`
-          const globalNavi = entries.filter((globalEntry) => {
-            return globalEntry.node.field_component == 'global_navi' && globalEntry.node.lang == entry.node.lang
-          })
-          if (!globalNavi.length) {
-            throw new Error('The global navigation item has not been found. Please create a content item with the content type global_navi in Storyblok.')
+      const globalSettings = result.data.allStoryblokEntry.edges[0].node;
+      resolve(
+        graphql(
+          `
+            {
+              allStoryblokEntry(filter: { slug: { ne: "settings" } }) {
+                edges {
+                  node {
+                    id
+                    name
+                    created_at
+                    published_at
+                    uuid
+                    slug
+                    full_slug
+                    content
+                    is_startpage
+                    parent_id
+                    group_id
+                  }
+                }
+              }
+            }
+          `
+        ).then(result => {
+          if (result.errors) {
+            console.log(result.errors);
+            reject(result.errors);
           }
 
-          createPage({
-            path: `/${pagePath}`,
-            component: storyblokEntry,
-            context: {
-              globalNavi: globalNavi[0],
-              story: entry.node
-            }
-          })
+          const entries = result.data.allStoryblokEntry.edges;
+          entries.forEach((entry, index) => {
+            createPage({
+              path: `/${entry.node.full_slug}/`,
+              component: storyblokEntry,
+              context: {
+                globalSettings: globalSettings,
+                story: entry.node
+              }
+            });
+          });
         })
-      })
-    )
-  })
-}
+      );
+    });
+  });
+};
