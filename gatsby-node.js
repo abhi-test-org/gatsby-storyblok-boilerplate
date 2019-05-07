@@ -64,8 +64,12 @@ exports.createPages = ({ graphql, boundActionCreators }) => {
             return reject(result.errors);
           }
 
-          const entries = result.data.allStoryblokEntry.edges;
+          const entries = result.data.allStoryblokEntry.edges || [];
           entries.forEach((entry, index) => {
+            if (!entry) {
+              return;
+            }
+
             createPage({
               path: `/${entry.node.full_slug}/`,
               component: storyblokEntry,
