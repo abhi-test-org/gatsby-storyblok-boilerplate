@@ -36,7 +36,7 @@ const getParam = function(val) {
 class StoryblokEntry extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {story: null, globalNavi: {content: {}}}
+    this.state = {story: null, globalSettings: {content: {}}}
   }
 
   componentDidMount() {
@@ -59,7 +59,7 @@ class StoryblokEntry extends React.Component {
       slug: `${language}global-navi`, 
       version: 'draft'
     }, (data) => {
-      this.setState({globalNavi: data.story})
+      this.setState({globalSettings: data.story})
     })
   }
 
@@ -92,12 +92,12 @@ class StoryblokEntry extends React.Component {
     }
 
     let content = this.state.story.content
-    let globalNavi = this.state.globalNavi.content
+    let globalSettings = this.state.globalSettings.content
 
     return (
       <SbEditable content={content}>
       <div>
-        <Navi blok={globalNavi}></Navi>
+        <Navi blok={globalSettings}></Navi>
         {Components[content.component] ? React.createElement(Components[content.component], {key: content._uid, blok: content}) : `Component ${content.component} not created yet`}
       </div>
       </SbEditable>

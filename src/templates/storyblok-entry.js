@@ -13,11 +13,11 @@ class StoryblokEntry extends React.Component {
 
   static prepareStory(props) {
     const story = Object.assign({}, props.pageContext.story)
-    const globalNavi = Object.assign({}, props.pageContext.globalNavi)
+    const globalSettings = Object.assign({}, props.pageContext.globalSettings)
     story.content = JSON.parse(story.content)
-    globalNavi.content = JSON.parse(globalNavi.content)
+    globalSettings.content = JSON.parse(globalSettings.content)
     
-    return { story, globalNavi }
+    return { story, globalSettings }
   }
 
   constructor(props) {
@@ -28,11 +28,11 @@ class StoryblokEntry extends React.Component {
 
   render() {
     let content = this.state.story.content
-    let globalNavi = this.state.globalNavi.content
+    let globalSettings = this.state.globalSettings.content
 
     return (
       <div>
-        <Navi blok={globalNavi}></Navi>
+        <Navi blok={globalSettings}></Navi>
         {React.createElement(Components[content.component], {key: content._uid, blok: content})}
       </div>
     )
